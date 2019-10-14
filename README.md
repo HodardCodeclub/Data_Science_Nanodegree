@@ -44,7 +44,7 @@ You can download the files [here](https://drive.google.com/drive/u/0/my-drive).
 
 #### OR
 
-You can even find it [here] ().
+You can even find it [here] (https://github.com/HodardCodeclub/Data_Science_Nanodegree/blob/master/first_project/Chart-Results/Udacity%20Programming%20for%20Data%20Science%20-%20Project%202%20Submission.pdf).
 
 
 #### Requirements
