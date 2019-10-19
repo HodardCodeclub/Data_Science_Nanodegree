@@ -4,7 +4,9 @@
 
 /*
 Question 3:
-Finally, provide a table with the family-friendly film category, each of the quartiles, and the corresponding count of movies within each combination of film category for each corresponding rental duration category.
+Finally, provide a table with the family-friendly film category, each of the quartiles, 
+and the corresponding count of movies within each combination of film 
+category for each corresponding rental duration category.
 */
 
 SELECT t.name,
