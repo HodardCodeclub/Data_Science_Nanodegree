@@ -32,21 +32,6 @@ The developed CLI program allows the user to explore an US bikeshare system data
 
 [Project Submission](https://github.com/HodardCodeclub/Data_Science_Nanodegree/blob/master/second_project/bikeshare.py).
 
-#### Files Used
-
-The required files for running this program are: 
-
-* washington.csv
-* new_york_city.csv
-* chicago.csv
-
-You can download the files [here](https://drive.google.com/drive/u/0/my-drive).
-
-#### OR
-
-You can even find it [here](https://github.com/HodardCodeclub/Data_Science_Nanodegree/tree/master/first_project/Chart-Results).
-
-
 #### Requirements
 
 This program was written in Python (version 3.6.8) and relies on the following libraries:
