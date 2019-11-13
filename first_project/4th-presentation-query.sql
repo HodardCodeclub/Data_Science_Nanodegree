@@ -1,34 +1,19 @@
-/* ---------- Query 4 - Film rental distribution by category ---------- */
+/* ---------- Query 4 - We want to understand more about the movies that families are watching. 
+The following categories are considered family movies: Animation, Children, Classics, Comedy, Family and Music.
 
-WITH t1 AS (SELECT c.customer_id, 
-                   p.amount, 
-                   DATE_TRUNC('month', p.payment_date) AS payment_date,
-			         p.rental_id
-              FROM customer AS c
-                   JOIN payment AS p
-                    ON c.customer_id = p.customer_id),
+Create a query that lists each movie, the film category it is classified in, 
+and the number of times it has been rented out ---------- */
 
-     t2 AS (SELECT t1.customer_id, 
-		   t1.payment_date,
-                   SUM(t1.amount) AS total_amtpaid,
-                   LEAD(SUM(t1.amount)) OVER(w) AS lead_num,
-                   LEAD(SUM(t1.amount)) OVER(w) - SUM(t1.amount) AS lead_dif,
-                   CASE 
-                       WHEN LEAD(SUM(t1.amount)) OVER(w) - SUM(t1.amount) < 0 THEN 0
-                       WHEN LEAD(SUM(t1.amount)) OVER(w) - SUM(t1.amount) >= 0 THEN 1
-                   END AS progress
-              FROM t1
-                   JOIN rental AS r
-                    ON r.rental_id = t1.rental_id
-                    AND t1.customer_id = r.customer_id
-             GROUP BY 1, 2
-            WINDOW w AS (PARTITION BY t1.customer_id ORDER BY DATE_TRUNC('month', t1.payment_date)))
-										  
-SELECT t2.payment_date,
-       COUNT(*) AS total_count,
-       SUM(t2.progress) AS progress_bymon,
-       COUNT(*) - SUM(t2.progress) AS regress_bymon
-  FROM t2
- WHERE t2.progress IS NOT NULL
- GROUP BY 1
- ORDER BY 1;
+SELECT f.title, c.name, COUNT(r.rental_id)
+FROM film_category fc
+     JOIN category c
+     ON c.category_id = fc.category_id
+     JOIN film f
+     ON f.film_id = fc.film_id
+     JOIN inventory i
+     ON i.film_id = f.film_id
+     JOIN rental r
+     ON r.inventory_id = i.inventory_id
+WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')
+GROUP BY 1, 2
+ORDER BY 2, 1

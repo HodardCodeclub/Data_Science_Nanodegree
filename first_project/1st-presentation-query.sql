@@ -1,66 +1,15 @@
 
-/* ---------- Query 1 - Number of rentals of top 10 renting countries ---------- */
+/* ---------- Query 1 - We need to know how the length of rental duration of these family-friendly 
+movies compares to the duration that all movies are rented for. Can you provide a table with the movie titles 
+and divide them into 4 levels (first_quarter, second_quarter, third_quarter, and final_quarter)
+ based on the quartiles (25%, 50%, 75%) of the rental duration for movies across all 
+categories? ---------- */
 
-WITH t1 AS (SELECT c3.customer_id, 
-                   p.rental_id
-              FROM country AS c1
-                   JOIN city AS c2
-                    ON c1.country_id = c2.country_id
-                   JOIN address a
-                    ON c2.city_id = a.city_id
-                   JOIN customer c3
-                    ON a.address_id = c3.address_id
-                   JOIN payment p
-                    ON c3.customer_id = p.customer_id
-                   JOIN (
-                        SELECT c1.country_id
-                          FROM country AS c1
-                               JOIN city AS c2
-                                ON c1.country_id = c2.country_id
-                               JOIN address a
-                                ON c2.city_id = a.city_id
-                               JOIN customer c3
-                                ON a.address_id = c3.address_id
-                               JOIN payment p
-                                ON c3.customer_id = p.customer_id
-                         GROUP BY 1
-                         ORDER BY SUM(p.amount) DESC
-                         LIMIT 10) sub
-                 ON sub.country_id = c1.country_id),
-					
-     t2 AS (SELECT c.name,
-                   COUNT(r.rental_id) AS count_top10
-              FROM t1
-                   JOIN rental AS r
-                    ON r.rental_id = t1.rental_id
-                   JOIN inventory AS i
-                    ON i.inventory_id = r.inventory_id
-                   JOIN film f
-                    ON f.film_id = i.film_id
-                   JOIN film_category fc
-                    ON f.film_id = fc.film_id
-                   JOIN category c
-                    ON c.category_id = fc.category_id
-             GROUP BY 1),
-
-     t3 AS (SELECT c.name,
-                   COUNT(r.rental_id) AS rental_count
-              FROM rental AS r
-                   JOIN inventory AS i
-                    ON i.inventory_id = r.inventory_id
-                   JOIN film f
-                    ON f.film_id = i.film_id
-                   JOIN film_category fc
-                    ON f.film_id = fc.film_id
-                   JOIN category c
-                    ON c.category_id = fc.category_id
-             GROUP BY 1)
-		
-SELECT t2.name AS category,
-       t3.rental_count - t2.count_top10 AS other_countries,
-       t2.count_top10,
-       CAST(t2.count_top10*100 AS FLOAT)/t3.rental_count AS "proportion(%)"
-  FROM t2
-       JOIN t3
-        ON t2.name = t3.name
- ORDER BY 2 DESC;
+SELECT f.title, c.name, f.rental_duration, NTILE(4) OVER (ORDER BY f.rental_duration) AS standard_quartile
+FROM film_category fc
+     JOIN category c
+     ON c.category_id = fc.category_id
+     JOIN film f
+     ON f.film_id = fc.film_id
+WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')
+ORDER BY 3

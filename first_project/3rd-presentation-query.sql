@@ -1,33 +1,25 @@
-/* ---------- Query 3 - Amount spent by the top 10 paying customers between February and April 2007 ---------- */
+/* ---------- Query 3 - Amount spent by the top 10 paying customers between February and May 2007 ---------- */
 
-WITH t1 AS (SELECT (first_name || ' ' || last_name) AS name, 
-                   c.customer_id, 
-                   p.amount, 
-                   p.payment_date
-              FROM customer AS c
-                   JOIN payment AS p
-                    ON c.customer_id = p.customer_id),
+/*-------We would like to know who were our top 10 paying customers, how many payments they made on 
+a monthly basis during 2007, and what was the amount of the monthly payments. Can you write a 
+query to capture the customer name, month and year of payment, and total payment amount for each 
+month by these top 10 paying customers?----------*/
 
-     t2 AS (SELECT t1.customer_id
-              FROM t1
-             GROUP BY 1
-             ORDER BY SUM(t1.amount) DESC
-             LIMIT 10),
 
-     t3 AS (SELECT t1.name,
-                   DATE_TRUNC('month', t1.payment_date) AS pay_mon, 
-                   COUNT(*) AS pay_countpermon,
-                   SUM(t1.amount) AS pay_amount
-              FROM t1
-                   JOIN t2
-                    ON t1.customer_id = t2.customer_id
-              WHERE t1.payment_date BETWEEN '20070101' AND '20080101'
-              GROUP BY 1, 2
-              ORDER BY 1, 3, 2)
 
-SELECT t3.name,
-       t3.pay_mon,
-       t3.pay_amount,
-	    ROUND(AVG(t3.pay_amount) OVER (PARTITION BY t3.name), 2) AS avg_amount					
-  FROM t3
- ORDER BY 1, 2;
+SELECT DATE_TRUNC('month', p.payment_date) pay_month, c.first_name || ' ' || c.last_name AS full_name, COUNT(p.amount) AS pay_countpermon, SUM(p.amount) AS pay_amount
+FROM customer c
+     JOIN payment p
+     ON p.customer_id = c.customer_id
+WHERE c.first_name || ' ' || c.last_name IN
+(SELECT t1.full_name
+     FROM
+          (SELECT c.first_name || ' ' || c.last_name AS full_name, SUM(p.amount) as amount_total
+          FROM customer c
+               JOIN payment p
+               ON p.customer_id = c.customer_id
+          GROUP BY 1
+          ORDER BY 2 DESC
+LIMIT 10) t1) AND (p.payment_date BETWEEN '2007-01-01' AND '2008-01-01')
+GROUP BY 2, 1
+ORDER BY 2, 1, 3
